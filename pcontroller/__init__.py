@@ -7,6 +7,31 @@ from plibs import os, sys, time, psutil, QObject, QThread, pyqtSignal, SPSecurit
 from pheader import *
 
 
+def translator(text: str) -> str:
+    """
+    Translate the messages text
+    :return: str
+    """
+
+    return Global.kernel.translate('Form', text)
+
+
+class ThreadingResult:
+    def __init__(
+            self, is_valid: bool = False, message: str = '', params: dict = {}
+    ):
+        self.isValid = is_valid
+        self.message = message
+        self.params = params
+        self.isError = False
+        self.errorMessage = ''
+
+    def error(self, text: str):
+        self.isValid = False
+        self.isError = True
+        self.errorMessage = "{}: {}".format(translator("Failed"), text)
+
+
 class SignalsThread(QObject):
     normalSignal = pyqtSignal()
     boolSignal = pyqtSignal(bool)
@@ -15,6 +40,7 @@ class SignalsThread(QObject):
     strSignal = pyqtSignal(str)
     listSignal = pyqtSignal(list)
     dictSignal = pyqtSignal(dict)
+    resultSignal = pyqtSignal(ThreadingResult)
 
     # // Set other signals here
     # ...
@@ -132,15 +158,6 @@ def dict_merge(dict1, dict2):
 
         else:
             yield k, dict2[k]
-
-
-def translator(text: str) -> str:
-    """
-    Translate the messages text
-    :return: str
-    """
-
-    return Global.kernel.translate('Form', text)
 
 
 def anti_duplicate_process(stop: bool = False):
